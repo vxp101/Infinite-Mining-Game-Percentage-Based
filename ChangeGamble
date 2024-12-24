@@ -1,0 +1,68 @@
+local function GetOre(lottery)
+
+	local Chance = math.random(1, #lottery)
+	--print(lottery, " ", Chance)
+	return lottery[Chance][1]
+
+end
+
+local function Gamble(y, Cave)
+
+	local Lottery = {}
+	local TotalWeight = 0
+	for Index, Ore in pairs(Items) do
+
+		local Biome = Ore:FindFirstChild("Biome") or nil
+		--local MaxDepth, MinDepth = (Ore.SpawnData.MaxDepth.Value > 0 and Ore.SpawnData.MaxDepth.Value) or 9999, (Ore.SpawnData.MinDepth.Value > 0 and Ore.SpawnData.MinDepth.Value) or 1
+		--local Range = MaxDepth - MinDepth + 1
+		--local MinDistance = y - MinDepth + 1
+		--local MaxDistance = MaxDepth - y + 1
+		--local SpawnRate = Ore.SpawnData.SpawnRate.Value
+		--local MaxRarity, MinRarity = Ore.MaxRarity.Value,Ore.MinRarity.Value
+
+		--local Chance = math.ceil(((MinDistance/Range) * MinRarity + (MaxDistance/Range) * MaxRarity) /2)
+
+		--This is what creates air, if removed it will remove caves :(
+
+		for _, i in pairs(Ore.SpawnData:GetChildren()) do
+			if y >= i.MinDepth.Value and y <= i.MaxDepth.Value then
+				if Ore:FindFirstChild("Cave") == nil or Cave == true and not Biome.Biome then
+
+					table.insert(Lottery, {Ore, i.SpawnRate.Value})
+					--print(Ore," ", MinDepth," ", " ", MaxDepth)
+					TotalWeight += i.SpawnRate.Value
+
+				end
+				if Biomes.Biome then
+					table.insert(Lottery, {Ore, i.SpawnRate.Value})
+					TotalWeight += i.SpawnRate.Value
+				end
+			end
+		end
+
+	end
+	local Lottery2 = {}
+	local Chance = math.random(1, TotalWeight)
+	local Count = 0
+
+	table.sort(Lottery, function(a, b)
+		if a[2] < b[2] then
+			return true
+		end
+	end)
+
+	for _, i in ipairs(Lottery) do
+
+		Count += i[2]
+
+		if Chance <= Count then
+			--print(Chance, " : ", Count, " : ", i)
+			table.insert(Lottery2, i)
+		end
+
+	end
+
+	return GetOre(Lottery2)
+	--local Id = Lottery[math.random(1, #Lottery)]
+	--return GetOreFromId(Id)
+end
